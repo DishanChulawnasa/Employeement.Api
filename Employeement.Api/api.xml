@@ -1,0 +1,62 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>Employeement.Api</name>
+    </assembly>
+    <members>
+        <member name="M:Employeement.Api.Controllers.EmployeeController.AddEmlpoyer(Employeement.Api.Dtos.EmployeeDto)">
+            <summary>
+            Create a new employee.
+            </summary>
+            <param name="addEmployeeDto"> The employee data to add.</param>
+            <returns> The newly created employee object.</returns>
+        </member>
+        <member name="M:Employeement.Api.Controllers.EmployeeController.GetAllEmployees">
+            <summary>
+            Return all the employees from the database.
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Employeement.Api.Controllers.EmployeeController.GetEmployeeByID(System.Int32)">
+            <summary>
+            Return an employee by id
+            </summary>
+            <param name="id"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Employeement.Api.Controllers.EmployeeController.GetEmployeeByName(System.String)">
+            <summary>
+            Search an employee by Name
+            </summary>
+            <param name="name"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Employeement.Api.Controllers.EmployeeController.UpdateEmployee(System.Int32,Employeement.Api.Dtos.EmployeeDto)">
+            <summary>
+            Update an existing employee.
+            </summary>
+            <param name="id"></param>
+            <param name="updateEmployee"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Employeement.Api.Controllers.EmployeeController.DeleteEmployee(System.Int32)">
+            <summary>
+            Delete an existing employee
+            </summary>
+            <param name="id"></param>
+            <returns></returns>
+        </member>
+        <member name="T:Employeement.Api.Migrations.initial">
+            <inheritdoc />
+        </member>
+        <member name="M:Employeement.Api.Migrations.initial.Up(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:Employeement.Api.Migrations.initial.Down(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:Employeement.Api.Migrations.initial.BuildTargetModel(Microsoft.EntityFrameworkCore.ModelBuilder)">
+            <inheritdoc />
+        </member>
+    </members>
+</doc>

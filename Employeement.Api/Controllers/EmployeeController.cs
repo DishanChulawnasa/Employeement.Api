@@ -1,9 +1,8 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using Employeement.Api.Controllers;
-using Employeement.Api.Data;
+﻿using AutoMapper;
 using Employeement.Api.Dtos;
+using Employeement.Api.Interfaces;
 using Employeement.Api.Models;
+using Microsoft.AspNetCore.Mvc;
 
 namespace Employeement.Api.Controllers
 {
@@ -11,96 +10,144 @@ namespace Employeement.Api.Controllers
     [ApiController]
     public class EmployeeController : ControllerBase
     {
-        private readonly EmployeeDbContext dbContext;
+        private readonly IEmployerRepository employerRepository;
+        private readonly IMapper mapper;
 
-        public EmployeeController(EmployeeDbContext dbContext)
+        public EmployeeController(IEmployerRepository employerRepository, IMapper mapper)
         {
-            this.dbContext = dbContext;
+            this.employerRepository = employerRepository;
+            this.mapper = mapper;
         }
 
         //CREATE Operation
-        //Add new employees to the database
+        /// <summary>
+        /// Create a new employee.
+        /// </summary>
+        /// <param name="addEmployeeDto"> The employee data to add.</param>
+        /// <returns> The newly created employee object.</returns>
         [HttpPost]
-        public IActionResult AddEmlpoyer(EmployeeDto addEmployeeDto)
+        public async Task<IActionResult> AddEmlpoyer([FromBody] EmployeeDto addEmployeeDto)
         {
-            var addEmployer = new Employee
+            /*var addEmployer = new Employee
             {
                 Name = addEmployeeDto.Name,
                 Email = addEmployeeDto.Email,
                 Phone = addEmployeeDto.Phone
-            };
+            };*/
+            if (addEmployeeDto == null)
+            {
+                return BadRequest("Employee data is required.");
+            }
 
-            dbContext.Add(addEmployer);
-            dbContext.SaveChanges();
+            var addEmployer = mapper.Map<Employee> (addEmployeeDto);
+            await employerRepository.AddEmployeeAsync(addEmployer);
+            var CreatedEmployeeDto = mapper.Map<EmployeeDto> (addEmployer);
 
-            return Ok(addEmployer);
+            return Ok(CreatedEmployeeDto);
         }
 
         //READ Operations
-        //return all the employees from the database.
+        /// <summary>
+        /// Return all the employees from the database.
+        /// </summary>
+        /// <returns></returns>
         [HttpGet]
-        public IActionResult GetAllEmployees()
+        public async Task<IActionResult> GetAllEmployees()
         {
-            var allEmployees = dbContext.Employees.ToList();
+            var allEmployees = await employerRepository.GetAllEmployees();
 
             return Ok(allEmployees);
         }
 
-        
-        //return employee by id
+
+        /// <summary>
+        /// Return an employee by id
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
         [HttpGet]
         [Route("{id}")]
-        public IActionResult GetEmployeeByID(int id) 
+        public async Task<IActionResult> GetEmployeeByID(int id)
         {
-            var employee = dbContext.Employees.Find(id);
-
-            if (employee == null)
-            {
-               return NotFound();
-            }
-
-            return Ok(employee);
-        }
-
-        
-        //Update Operation
-        [HttpPut]
-        [Route("{id}")]
-        public IActionResult UpdateEmployee(int id, EmployeeDto updateEmployee)
-        {
-            var employee = dbContext.Employees.Find(id);
+            var employee = await employerRepository.GetEmployeeByIDAsync(id);
 
             if (employee == null)
             {
                 return NotFound();
             }
 
-            employee.Name = updateEmployee.Name;
-            employee.Email = updateEmployee.Email;
-            employee.Phone = updateEmployee.Phone;
+            return Ok(employee);
+        }
 
-            dbContext.SaveChanges();
+        /// <summary>
+        /// Search an employee by Name
+        /// </summary>
+        /// <param name="name"></param>
+        /// <returns></returns>
+        [HttpGet]
+        [Route("search/{name}")]
+        public async Task<IActionResult> GetEmployeeByName(string name)
+        {
+            var employee = await employerRepository.GetEmployeeByNameAsync(name);
 
-            return Ok(updateEmployee);
+            if (employee == null || !employee.Any())
+            {
+                return NotFound();
+            }
+
+            return Ok(employee);
+        }
+
+        //Update Operation
+        /// <summary>
+        /// Update an existing employee.
+        /// </summary>
+        /// <param name="id"></param>
+        /// <param name="updateEmployee"></param>
+        /// <returns></returns>
+        [HttpPut]
+        [Route("{id}")]
+        public async Task<IActionResult> UpdateEmployee(int id, EmployeeDto updateEmployeeDto)
+        {
+            var existingEmployee = await employerRepository.GetEmployeeByIDAsync(id);
+
+            if (existingEmployee == null)
+            {
+                return NotFound();
+            }
+
+            /*employee.Name = updateEmployeeDto.Name;
+            employee.Email = updateEmployeeDto.Email;
+            employee.Phone = updateEmployeeDto.Phone;*/
+
+            mapper.Map(updateEmployeeDto, existingEmployee);
+            await employerRepository.UpdateEmployeeAsync(existingEmployee);
+            var updatedEmployeeDto  = mapper.Map<EmployeeDto>(existingEmployee);
+
+            return Ok(updatedEmployeeDto);
         }
 
         //Delete Operation
+        /// <summary>
+        /// Delete an existing employee
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
         [HttpDelete]
         [Route("{id}")]
-        public IActionResult DeleteEmployee(int id)
+        public async Task<IActionResult> DeleteEmployee(int id)
         {
-            var employee = dbContext.Employees.Find(id);
+            var employee = await employerRepository.GetEmployeeByIDAsync(id);
 
             if (employee == null)
             {
                 return NotFound(id);
             }
 
-            dbContext.Employees.Remove(employee);
-            dbContext.SaveChanges();    
+            await employerRepository.DeleteEmployeeAsync(employee);
 
             return Ok();
         }
-        
+
     }
 }
